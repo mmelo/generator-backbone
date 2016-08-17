@@ -64,8 +64,10 @@ var BackboneGenerator = yeoman.generators.Base.extend({
   install: function () {
     this.composeWith('backbone:router', {arguments: this.args});
     this.composeWith('backbone:view', {arguments: this.args});
+    this.composeWith('backbone:pod', {arguments: this.args});
     this.composeWith('backbone:model', {arguments: this.args});
     this.composeWith('backbone:collection', {arguments: this.args});
+    this.composeWith('backbone:controller', {arguments: this.args});
   }
 });
 

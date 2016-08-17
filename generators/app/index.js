@@ -49,7 +49,7 @@ var BackboneGenerator = yeoman.generators.Base.extend({
     this.config.set('appPath', this.env.options.appPath);
 
     this.testFramework = this.options['test-framework'] || 'mocha';
-    this.templateFramework = this.options['template-framework'] || 'lodash';
+    this.templateFramework = this.options['template-framework'] || 'handlebars';
 
     this.config.defaults({
       appName: this.appname,
@@ -57,7 +57,6 @@ var BackboneGenerator = yeoman.generators.Base.extend({
       coffee: this.options.coffee,
       testFramework: this.testFramework,
       templateFramework: this.templateFramework,
-      sassBootstrap: this.sassBootstrap,
       includeRequireJS: this.options.requirejs
     });
 
@@ -76,21 +75,9 @@ var BackboneGenerator = yeoman.generators.Base.extend({
       name: 'features',
       message: 'What more would you like?',
       choices: [{
-        name: 'Twitter Bootstrap for Sass',
-        value: 'sassBootstrap',
-        checked: true
-      }, {
-        name: 'Use CoffeeScript',
-        value: 'coffee',
-        checked: this.options.coffee || false
-      }, {
         name: 'Use RequireJS',
         value: 'requirejs',
         checked: this.options.requirejs || false
-      }, {
-        name: 'Use Modernizr',
-        value: 'modernizr',
-        checked: false
       }]
     }];
 
@@ -101,16 +88,7 @@ var BackboneGenerator = yeoman.generators.Base.extend({
 
       // manually deal with the response, get back and store the results.
       // we change a bit this way of doing to automatically do this in the self.prompt() method.
-      this.sassBootstrap = hasFeature('sassBootstrap');
       this.includeRequireJS = hasFeature('requirejs');
-      this.includeModernizr = hasFeature('modernizr');
-      this.config.set('sassBootstrap', this.sassBootstrap);
-
-
-      if (!this.options.coffee) {
-        this.options.coffee = hasFeature('coffee');
-        this.config.set('coffee', this.options.coffee);
-      }
 
       if (!this.options.requirejs) {
         this.options.requirejs = this.includeRequireJS;
@@ -149,9 +127,7 @@ var BackboneGenerator = yeoman.generators.Base.extend({
         this.destinationPath('bower.json'),
         {
           appParamCaseName: paramCase(this.appname),
-          sassBootstrap: this.sassBootstrap,
           includeRequireJS: this.includeRequireJS,
-          includeModernizr: this.includeModernizr,
           templateFramework: this.templateFramework
         }
       );
@@ -182,9 +158,7 @@ var BackboneGenerator = yeoman.generators.Base.extend({
         this.destinationPath('Gruntfile.js'),
         {
           appPath: this.env.options.appPath,
-          hasCoffee: this.options.coffee,
           includeRequireJS: this.includeRequireJS,
-          sassBootstrap: this.sassBootstrap,
           templateFramework: this.templateFramework,
           testFramework: this.testFramework
         }
@@ -196,9 +170,7 @@ var BackboneGenerator = yeoman.generators.Base.extend({
         this.templatePath('_package.json'),
         this.destinationPath('package.json'),
         {
-          hasCoffee: this.options.coffee,
           includeRequireJS: this.includeRequireJS,
-          sassBootstrap: this.sassBootstrap,
           templateFramework: this.templateFramework,
           testFramework: this.testFramework
         }
@@ -210,18 +182,6 @@ var BackboneGenerator = yeoman.generators.Base.extend({
         'body {\n    background: #fafafa;\n}',
         '\n.hero-unit {\n    margin: 50px auto 0 auto;\n    width: 300px;\n}'
       ];
-      var ext = '.css';
-      if (this.sassBootstrap) {
-        this.fs.copyTpl(
-          this.templatePath('main.scss'),
-          this.destinationPath(this.env.options.appPath + '/styles/main.scss')
-        );
-        return;
-      }
-      this.fs.write(
-        this.destinationPath(this.env.options.appPath + '/styles/main' + ext),
-        contentText.join('\n')
-      );
     },
 
     writeIndex: function () {
@@ -234,9 +194,7 @@ var BackboneGenerator = yeoman.generators.Base.extend({
         this.indexFile,
         {
           appName: this.appname,
-          includeModernizr: this.includeModernizr,
           includeRequireJS: this.includeRequireJS,
-          sassBootstrap: this.sassBootstrap
         }
       );
 
@@ -246,29 +204,9 @@ var BackboneGenerator = yeoman.generators.Base.extend({
         'bower_components/backbone/backbone.js'
       ];
 
-      if (this.templateFramework === 'handlebars') {
-        vendorJS.push('bower_components/handlebars/handlebars.js');
-      }
+    vendorJS.push('bower_components/handlebars/handlebars.js');
 
       this.indexFile = htmlWiring.appendScripts(this.indexFile, 'scripts/vendor.js', vendorJS);
-
-      if (this.sassBootstrap) {
-        // wire Twitter Bootstrap plugins
-        this.indexFile = htmlWiring.appendScripts(this.indexFile, 'scripts/plugins.js', [
-          'bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/affix.js',
-          'bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/alert.js',
-          'bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/button.js',
-          'bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/carousel.js',
-          'bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/collapse.js',
-          'bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js',
-          'bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/modal.js',
-          'bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/tooltip.js',
-          'bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/popover.js',
-          'bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/scrollspy.js',
-          'bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/tab.js',
-          'bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/transition.js'
-        ]);
-      }
 
       this.indexFile = htmlWiring.appendFiles({
         html: this.indexFile,
@@ -291,9 +229,7 @@ var BackboneGenerator = yeoman.generators.Base.extend({
         this.indexFile,
         {
           appName: this.appname,
-          includeModernizr: this.includeModernizr,
           includeRequireJS: this.includeRequireJS,
-          sassBootstrap: this.sassBootstrap
         }
       );
     },
@@ -340,7 +276,6 @@ var BackboneGenerator = yeoman.generators.Base.extend({
         'requirejs_app',
         this.env.options.appPath + '/scripts/main',
         {
-          sassBootstrap: this.sassBootstrap,
           templateFramework: this.templateFramework
         }
       );

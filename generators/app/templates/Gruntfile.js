@@ -2,8 +2,9 @@
 var LIVERELOAD_PORT = 35729;
 var SERVER_PORT = 9000;
 var lrSnippet = require('connect-livereload')({port: LIVERELOAD_PORT});
+var serveStatic = require('serve-static');
 var mountFolder = function (connect, dir) {
-  return connect.static(require('path').resolve(dir));
+  return serveStatic(require('path').resolve(dir));
 };
 
 // # Globbing
@@ -11,7 +12,7 @@ var mountFolder = function (connect, dir) {
 // 'test/spec/{,*/}*.js'
 // use this if you want to match all subfolders:
 // 'test/spec/**/*.js'
-// templateFramework: '<%= templateFramework %>'
+// templateFramework: 'handlebars'
 
 module.exports = function (grunt) {
 
@@ -35,19 +36,11 @@ module.exports = function (grunt) {
       options: {
         nospawn: true,
         livereload: LIVERELOAD_PORT
-      },<% if (hasCoffee) { %>
-      coffee: {
-        files: ['<%%= yeoman.app %>/scripts/{,*/}*.coffee'],
-        tasks: ['coffee:dist']
       },
-      coffeeTest: {
-        files: ['test/spec/{,*/}*.coffee'],
-        tasks: ['coffee:test']
-      },<% } %><% if (sassBootstrap) { %>
       sass: {
         files: ['<%%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
         tasks: ['sass:server']
-      },<% } %>
+      },
       livereload: {
         options: {
           livereload: grunt.option('livereloadport') || LIVERELOAD_PORT
@@ -57,31 +50,14 @@ module.exports = function (grunt) {
           '{.tmp,<%%= yeoman.app %>}/styles/{,*/}*.css',
           '{.tmp,<%%= yeoman.app %>}/scripts/{,*/}*.js',
           '<%%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp}',
-          '<%%= yeoman.app %>/scripts/templates/*.{ejs,mustache,hbs}',
-          'test/spec/**/*.js'
+          '<%%= yeoman.app %>/scripts/**/*.{hbs}'
         ]
-      }<% if (templateFramework === 'mustache') { %>,
-      mustache: {
-        files: [
-          '<%%= yeoman.app %>/scripts/templates/*.mustache'
-        ],
-        tasks: ['mustache']
-      }<% } else if (templateFramework === 'handlebars') { %>,
+      },
       handlebars: {
         files: [
-          '<%%= yeoman.app %>/scripts/templates/*.hbs'
+          '<%%= yeoman.app %>/scripts/**/*.hbs'
         ],
         tasks: ['handlebars']
-      }<% } else { %>,
-      jst: {
-        files: [
-          '<%%= yeoman.app %>/scripts/templates/*.ejs'
-        ],
-        tasks: ['jst']
-      }<% } %>,
-      test: {
-        files: ['<%%= yeoman.app %>/scripts/{,*/}*.js', 'test/spec/**/*.js'],
-        tasks: ['test:true']
       }
     },
     connect: {
@@ -148,57 +124,6 @@ module.exports = function (grunt) {
         'test/spec/{,*/}*.js'
       ]
     },
-<% if (testFramework === 'mocha') { -%>
-    mocha: {
-      all: {
-        options: {
-          run: true,
-          urls: ['http://localhost:<%%= connect.test.options.port %>/index.html']
-        }
-      }
-    },
-<% } else { -%>
-    jasmine: {
-      all:{
-        src : '<%%= yeoman.app %>/scripts/{,*/}*.js',
-        options: {
-          keepRunner: true,
-          specs : 'test/spec/**/*.js',
-          vendor : [
-            '<%%= yeoman.app %>/bower_components/jquery/dist/jquery.js',
-            '<%%= yeoman.app %>/bower_components/lodash/dist/lodash.js',
-            '<%%= yeoman.app %>/bower_components/backbone/backbone.js',
-            '.tmp/scripts/templates.js'
-          ]
-        }
-      }
-    },
-<% } -%>
-<% if (hasCoffee) { -%>
-    coffee: {
-      dist: {
-        files: [{
-          // rather than compiling multiple files here you should
-          // require them into your main .coffee file
-          expand: true,
-          cwd: '<%%= yeoman.app %>/scripts',
-          src: '{,*/}*.coffee',
-          dest: '.tmp/scripts',
-          ext: '.js'
-        }]
-      },
-      test: {
-        files: [{
-          expand: true,
-          cwd: 'test/spec',
-          src: '{,*/}*.coffee',
-          dest: '.tmp/spec',
-          ext: '.js'
-        }]
-      }
-    },
-<% } -%>
-<% if (sassBootstrap) { -%>
     sass: {
       options: {
         sourceMap: true,
@@ -223,8 +148,6 @@ module.exports = function (grunt) {
         }]
       }
     },
-<% } -%>
-<% if (includeRequireJS) { -%>
     requirejs: {
       dist: {
         // Options: https://github.com/jrburke/r.js/blob/master/build/example.build.js
@@ -238,22 +161,14 @@ module.exports = function (grunt) {
 
           modules: [{name: 'main'}],
           baseUrl: '<%%= yeoman.app %>/scripts',
-<% if (hasCoffee) { %>
-          paths: {
-            'main': '../../.tmp/scripts/main'
-          },
-          allowSourceOverwrites: true,
-          mainConfigFile: '.tmp/scripts/main.js', // contains path specifications and nothing else important with respect to config
-<% } else { %>
+
           mainConfigFile: '<%%= yeoman.app %>/scripts/main.js', // contains path specifications and nothing else important with respect to config
-<% } %>
+
           keepBuildDir: true,
           dir: '.tmp/scripts',
 
           optimize: 'none', // optimize by uglify task
-          useStrict: true<% if (templateFramework !== 'handlebars') { %>,
-          wrap: true
-<% } %>
+          useStrict: true
         }
       }
     },
@@ -266,14 +181,6 @@ module.exports = function (grunt) {
         }
       }
     },
-<% } else { -%>
-    // not enabled since usemin task does concat and uglify
-    // check index.html to edit your build targets
-    // enable this task if you prefer defining your build targets here
-    /*uglify: {
-      dist: {}
-    },*/
-<% } -%>
     useminPrepare: {
       html: '<%%= yeoman.app %>/index.html',
       options: {
@@ -339,9 +246,7 @@ module.exports = function (grunt) {
             '*.{ico,txt}',
             'images/{,*/}*.{webp,gif}',
             'styles/fonts/{,*/}*.*',
-<% if (sassBootstrap) { -%>
             'bower_components/bootstrap-sass-official/assets/fonts/bootstrap/*.*'
-<% } -%>
           ]
         }, {
           src: 'node_modules/apache-server-configs/dist/.htaccess',
@@ -349,57 +254,22 @@ module.exports = function (grunt) {
         }]
       }
     },
-<% if (includeRequireJS) { -%>
     bower: {
       all: {
         rjsConfig: '<%%= yeoman.app %>/scripts/main.js'
       }
     },
-<% } -%>
-<% if (templateFramework === 'mustache') { -%>
-    mustache: {
-      files: {
-        src: '<%%= yeoman.app %>/scripts/templates/',
-        dest: '.tmp/scripts/templates.js',
-        options: {
-<%   if (includeRequireJS) { -%>
-          prefix: 'define(function() { this.JST = ',
-          postfix: '; return this.JST;});'
-<%   } else { -%>
-          prefix: 'this.JST = ',
-          postfix: ';'
-<%   } -%>
-        }
-      }
-    }
-<% } else if (templateFramework === 'handlebars') { -%>
     handlebars: {
       compile: {
         options: {
-<%   if (includeRequireJS) { -%>
           amd: true,
-<%   } -%>
           namespace: 'JST'
         },
         files: {
-          '.tmp/scripts/templates.js': ['<%%= yeoman.app %>/scripts/templates/*.hbs']
+          '.tmp/scripts/templates.js': ['<%%= yeoman.app %>/scripts/**/*.hbs']
         }
       }
     },
-<% } else { -%>
-    jst: {
-<%   if (includeRequireJS) { -%>
-      options: {
-        amd: true
-      },
-<%   } -%>
-      compile: {
-        files: {
-          '.tmp/scripts/templates.js': ['<%%= yeoman.app %>/scripts/templates/*.ejs']
-        }
-      }
-    },
-<% } -%>
     rev: {
       dist: {
         files: {
@@ -408,9 +278,7 @@ module.exports = function (grunt) {
             '<%%= yeoman.dist %>/styles/{,*/}*.css',
             '<%%= yeoman.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp}',
             '<%%= yeoman.dist %>/styles/fonts/{,*/}*.*',
-<% if (sassBootstrap) { -%>
             'bower_components/bootstrap-sass-official/assets/fonts/bootstrap/*.*'
-<% } -%>
           ]
         }
       }
@@ -434,20 +302,9 @@ module.exports = function (grunt) {
     if (target === 'test') {
       return grunt.task.run([
         'clean:server',
-<% if (hasCoffee) { -%>
-        'coffee',
-<% } -%>
         'createDefaultTemplate',
-<% if (templateFramework === 'mustache' ) { -%>
-        'mustache',
-<% } else if (templateFramework === 'handlebars') { -%>
         'handlebars',
-<% } else { -%>
-        'jst',
-<% } -%>
-<% if (sassBootstrap) { -%>
         'sass:server',
-<% } -%>
         'connect:test',
         'open:test',
         'watch'
@@ -456,20 +313,9 @@ module.exports = function (grunt) {
 
     grunt.task.run([
       'clean:server',
-<% if (hasCoffee) { -%>
-      'coffee:dist',
-<% } -%>
       'createDefaultTemplate',
-<% if (templateFramework === 'mustache') { -%>
-      'mustache',
-<% } else if (templateFramework === 'handlebars') { -%>
       'handlebars',
-<% } else { -%>
-      'jst',
-<% } -%>
-<% if (sassBootstrap) { -%>
       'sass:server',
-<% } -%>
       'connect:livereload',
       'open:server',
       'watch'
@@ -480,26 +326,11 @@ module.exports = function (grunt) {
     isConnected = Boolean(isConnected);
     var testTasks = [
         'clean:server',
-<% if (hasCoffee) { -%>
-        'coffee',
-<% } -%>
         'createDefaultTemplate',
-<% if (templateFramework === 'mustache' ) { -%>
-        'mustache',
-<% } else if (templateFramework === 'handlebars') { -%>
         'handlebars',
-<% } else { -%>
-        'jst',
-<% } -%>
-<% if (sassBootstrap) { -%>
         'sass',
-<% } -%>
-<% if(testFramework === 'mocha') { -%>
         'connect:test',
         'mocha'
-<% } else { -%>
-        'jasmine'
-<% } -%>
       ];
 
     if(!isConnected) {
@@ -513,28 +344,15 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'clean:dist',
-<% if (hasCoffee) { -%>
-    'coffee',
-<% } -%>
     'createDefaultTemplate',
-<% if (templateFramework === 'mustache' ) { -%>
-    'mustache',
-<% } else if (templateFramework === 'handlebars') { -%>
     'handlebars',
-<% } else { -%>
-    'jst',
-<% } -%>
-<% if (sassBootstrap) { -%>
     'sass:dist',
-<% } -%>
     'useminPrepare',
     'imagemin',
     'htmlmin',
     'concat',
     'cssmin',
-<% if (includeRequireJS) { -%>
     'requirejs',
-<% } -%>
     'uglify',
     'copy',
     'rev',
@@ -542,8 +360,8 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('default', [
-    'jshint',
-    'test',
+    //'jshint',
+    //'test',
     'build'
   ]);
 };

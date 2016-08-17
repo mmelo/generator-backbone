@@ -1,7 +1,7 @@
 {
   "name": "generator-backbone",
-  "version": "0.4.2",
-  "description": "Scaffold out a Backbone.js project",
+  "version": "0.0.0",
+  "description": "Scaffold out an opinionated Backbone.js project",
   "keywords": [
     "yeoman-generator",
     "scaffold",
@@ -11,7 +11,7 @@
   ],
   "author": "Yeoman",
   "main": "generators/app/index.js",
-  "repository": "yeoman/generator-backbone",
+  "repository": "mmelo/generator-backbone",
   "scripts": {
     "test": "mocha --reporter spec"
   },
@@ -40,6 +40,7 @@
     "generators/collection",
     "generators/model",
     "generators/router",
+	"generators/controller",
     "generators/templates",
     "generators/view",
     "script-base.js",

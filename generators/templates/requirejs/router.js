@@ -1,9 +1,8 @@
 /*global define*/
 
 define([
-  'jquery',
   'backbone'
-], function ($, Backbone) {
+], function (Backbone) {
   'use strict';
 
   var <%= className %>Router = Backbone.Router.extend({

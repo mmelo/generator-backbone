@@ -7,7 +7,7 @@ define([
 ], function (_, Backbone, JST) {
   'use strict';
 
-  var <%= className %>View = Backbone.View.extend({
+  var <%= className %>Pod = Backbone.View.extend({
     template: JST['<%= jst_path %>'],
 
     tagName: 'div',
@@ -28,5 +28,5 @@ define([
     }
   });
 
-  return <%= className %>View;
+  return <%= className %>Pod;
 });

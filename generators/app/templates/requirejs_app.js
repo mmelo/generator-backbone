@@ -3,30 +3,36 @@
 
 require.config({
   shim: {
-<% if (sassBootstrap) { -%>
     bootstrap: {
       deps: ['jquery'],
       exports: 'jquery'
     },
-<% } -%>
-<% if (templateFramework === 'handlebars') { -%>
       handlebars: {
       exports: 'Handlebars'
     }
-<% } -%>
   },
   paths: {
     jquery: '../bower_components/jquery/dist/jquery',
     backbone: '../bower_components/backbone/backbone',
-    underscore: '../bower_components/lodash/dist/lodash'<% if (sassBootstrap) { -%>,
-    bootstrap: '../bower_components/bootstrap-sass-official/assets/javascripts/bootstrap'<% } -%><% if (templateFramework === 'handlebars') { -%>,
+    underscore: '../bower_components/lodash/dist/lodash',
     handlebars: '../bower_components/handlebars/handlebars'
-<% } -%>
   }
 });
 
 require([
-  'backbone'
-], function (Backbone) {
-  Backbone.history.start();
+	'backbone',
+	'routes/router'
+], function (Backbone, Router) {
+	// App Namespacing
+	window.App = {
+		apiUrl: '',
+		Vent: _.extend({}, Backbone.Events),
+		Views: {},
+		Collections: {},
+		Controllers: {},
+		Models: {}
+	};
+
+	App.Router = new Router;
+	Backbone.history.start();
 });
