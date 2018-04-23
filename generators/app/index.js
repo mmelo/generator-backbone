@@ -27,7 +27,7 @@ var BackboneGenerator = yeoman.generators.Base.extend({
     this.option('template-framework', {
       desc: 'Choose template framework. lodash/handlebars/mustache',
       type: 'String',
-      defaults: 'lodash'
+      defaults: 'handlebars'
     });
 
     this.option('test-framework', {
